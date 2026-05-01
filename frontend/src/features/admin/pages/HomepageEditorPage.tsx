@@ -218,7 +218,7 @@ export default function HomepageEditorPage() {
 
   // ── Register sign-out guard while on this page ────────────────────────────
   useEffect(() => {
-    setSignOutGuard(() => () => {
+    setSignOutGuard(() => {
       if (!hasUnsaved) return true;
       return window.confirm("You have unsaved changes. Sign out anyway? Changes will be lost.");
     });
