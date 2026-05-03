@@ -53,6 +53,11 @@ export default function LandingPage() {
   const [content, setContent]                       = useState<Content>(DEFAULT_CONTENT);
   const [starsFilter, setStarsFilter]               = useState<"all" | "competitive" | "classes">("all");
 
+  const heroImageSize = useRef(
+    window.innerWidth <= 480 ? 480 : window.innerWidth <= 768 ? 768 : window.innerWidth <= 1200 ? 1200 : 1600
+  );
+  const personImageSize = useRef(window.innerWidth <= 480 ? 240 : 480);
+
   const wheelGestureActiveRef       = useRef(false);
   const wheelGestureResetTimerRef   = useRef<number | null>(null);
   const heroCardRef                 = useRef<HTMLDivElement | null>(null);
@@ -104,13 +109,11 @@ export default function LandingPage() {
     setActiveBanner((prev) => Math.min(prev, BANNER_IMAGES.length - 1));
   }, [BANNER_IMAGES.length]);
 
-  // ── Preload all hero images so rotations are instant ─────────────────────
+  // ── Preload hero images (size fixed at page load, never changes on resize) ──
   useEffect(() => {
     for (let i = 1; i <= heroCount; i++) {
-      [480, 768, 1200, 1600].forEach((s) => {
-        const img = new Image();
-        img.src = `${S3_BASE}/images/hero_${i}-${s}.webp`;
-      });
+      const img = new Image();
+      img.src = `${S3_BASE}/images/hero_${i}-${heroImageSize.current}.webp`;
     }
   }, [heroCount]);
 
@@ -350,9 +353,7 @@ export default function LandingPage() {
           >
             <img
               key={activeBanner}
-              src={`${S3_BASE}/images/hero_${activeBanner + 1}-480.webp`}
-              srcSet={[480, 768, 1200, 1600].map((s) => `${S3_BASE}/images/hero_${activeBanner + 1}-${s}.webp ${s}w`).join(", ")}
-              sizes="(max-width: 600px) 480px, (max-width: 900px) 768px, (max-width: 1400px) 1200px, 1600px"
+              src={`${S3_BASE}/images/hero_${activeBanner + 1}-${heroImageSize.current}.webp`}
               alt="Hero banner"
               loading="eager"
               onError={imgFallback(defaultHeroImage)}
@@ -399,9 +400,7 @@ export default function LandingPage() {
                 <article key={`${s.name}-${idx}`} className="lp-stars-card">
                   <div className="lp-stars-img-wrap">
                     <img
-                      src={`${S3_BASE}/images/star_${(idx % filteredStars.length) + 1}-240.webp`}
-                      srcSet={`${S3_BASE}/images/star_${(idx % filteredStars.length) + 1}-240.webp 240w, ${S3_BASE}/images/star_${(idx % filteredStars.length) + 1}-480.webp 480w`}
-                      sizes="160px"
+                      src={`${S3_BASE}/images/star_${(idx % filteredStars.length) + 1}-${personImageSize.current}.webp`}
                       alt={s.name}
                       loading="lazy"
                       onError={imgFallback(defaultPersonImage)}
@@ -428,9 +427,7 @@ export default function LandingPage() {
                 <article key={f.name + idx} className="lp-faculty-card">
                   <div className="lp-faculty-img-wrap">
                     <img
-                      src={`${S3_BASE}/images/faculty_${idx + 1}-300.webp`}
-                      srcSet={`${S3_BASE}/images/faculty_${idx + 1}-300.webp 300w, ${S3_BASE}/images/faculty_${idx + 1}-600.webp 600w`}
-                      sizes="(max-width: 600px) 150px, 200px"
+                      src={`${S3_BASE}/images/faculty_${idx + 1}-${personImageSize.current === 240 ? 300 : 600}.webp`}
                       alt={f.name}
                       loading="lazy"
                       onError={imgFallback(defaultPersonImage)}
